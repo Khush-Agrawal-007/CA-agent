@@ -1,90 +1,102 @@
 // src/pages/ITRHubPage.tsx
-import { Link } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { Trash2, ArrowLeft } from "lucide-react"
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Trash2, ArrowLeft, Bot, Zap, ArrowRight, ShieldCheck, FileCheck, HelpCircle } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // ── types ─────────────────────────────────────────────────────────────
 interface RecentSession {
-  id:       string
-  date:     string   // ISO string stored in localStorage
-  itrForm:  string | null
-  fields:   number   // count of collected fields
-  stage:    string
+  id: string;
+  date: string; // ISO string stored in localStorage
+  itrForm: string | null;
+  fields: number; // count of collected fields
+  stage: string;
 }
 
 // ── local storage helpers ─────────────────────────────────────────────
-const SESSIONS_KEY = "ca_agent_itr_sessions"
+const SESSIONS_KEY = "ca_agent_itr_sessions";
 
 function loadSessions(): RecentSession[] {
   try {
-    const raw = localStorage.getItem(SESSIONS_KEY)
-    return raw ? JSON.parse(raw) : []
+    const raw = localStorage.getItem(SESSIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch {
-    return []
+    return [];
   }
 }
 
 // ── entry point card ──────────────────────────────────────────────────
 interface EntryCardProps {
-  to:          string
-  icon:        React.ReactNode
-  title:       string
-  description: string
-  badge?:      string
-  badgeColor?: "purple" | "teal" | "amber"
-  cta:         string
-  ctaColor:    "purple" | "teal"
+  to: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  badge?: string;
+  variant: "indigo" | "emerald";
+  cta: string;
 }
 
-function EntryCard({ to, icon, title, description, badge, badgeColor = "purple", cta, ctaColor }: EntryCardProps) {
-  const badgeStyles = {
-    purple: "bg-purple-500/15 text-purple-300",
-    teal:   "bg-teal-500/15 text-teal-300",
-    amber:  "bg-amber-500/15 text-amber-300",
-  }
-  const ctaStyles = {
-    purple: "bg-purple-600 hover:bg-purple-500 text-white shadow-sm shadow-purple-600/20",
-    teal:   "bg-teal-600 hover:bg-teal-500 text-white shadow-sm shadow-teal-600/20",
-  }
+function EntryCard({
+  to,
+  icon,
+  title,
+  description,
+  badge,
+  variant,
+  cta,
+}: EntryCardProps) {
+  const isIndigo = variant === "indigo";
+
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-4 hover:border-border/80 hover:shadow-lg hover:shadow-black/10 transition-all">
+    <div className="clay-card-interactive p-6 flex flex-col gap-4">
       <div className="flex items-start justify-between">
-        <div className="w-11 h-11 rounded-xl bg-muted/60 border border-border flex items-center justify-center text-muted-foreground">
+        <div
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+            isIndigo ? "clay-btn-primary text-white" : "clay-btn-emerald text-white"
+          }`}
+        >
           {icon}
         </div>
         {badge && (
-          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${badgeStyles[badgeColor]}`}>
+          <span
+            className={`clay-pill text-xs font-bold px-3 py-1 ${
+              isIndigo
+                ? "bg-primary/15 text-primary border-primary/30"
+                : "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+            }`}
+          >
             {badge}
           </span>
         )}
       </div>
+
       <div>
-        <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        <h3 className="text-base font-extrabold text-foreground mb-1.5">{title}</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed font-medium">{description}</p>
       </div>
+
       <Link
         to={to}
-        className={`mt-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5
-                    rounded-xl text-sm font-medium transition-colors ${ctaStyles[ctaColor]}`}
+        className={`mt-auto inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold tracking-wide transition-all ${
+          isIndigo ? "clay-btn-primary" : "clay-btn-emerald"
+        }`}
       >
-        {cta}
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
-        </svg>
+        <span>{cta}</span>
+        <ArrowRight size={14} />
       </Link>
     </div>
-  )
+  );
 }
 
 // ── main component ────────────────────────────────────────────────────
 export default function ITRHubPage() {
-  const [sessions, setSessions] = useState<RecentSession[]>([])
-  const currentYear             = new Date().getFullYear()
-  const assessmentYear          = `AY ${currentYear}-${String(currentYear + 1).slice(2)}`
+  const [sessions, setSessions] = useState<RecentSession[]>([]);
+  const currentYear = new Date().getFullYear();
+  const assessmentYear = `AY ${currentYear}-${String(currentYear + 1).slice(2)}`;
 
   useEffect(() => {
-    setSessions(loadSessions().slice(0, 3)) // show last 3
-  }, [])
+    setSessions(loadSessions().slice(0, 3)); // show last 3
+  }, []);
 
   const deleteSession = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -100,87 +112,76 @@ export default function ITRHubPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto scrollbar-thin bg-background p-6">
-      <div className="max-w-3xl mx-auto space-y-8">
-
+    <div className="min-h-screen overflow-y-auto scrollbar-thin bg-background p-6 transition-colors duration-200">
+      <div className="max-w-4xl mx-auto space-y-7">
         {/* ── PAGE HEADER ──────────────────────────────────────── */}
-        <div className="flex flex-col gap-4">
-          <Link to="/chat" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-fit transition-colors">
-            <ArrowLeft size={16} /> Back to Dashboard
-          </Link>
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">ITR Hub</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Everything you need to file your Income Tax Return for {assessmentYear}
-              </p>
-            </div>
+        <div className="flex items-center justify-between gap-4 pb-2 border-b border-border">
+          <div className="space-y-1">
+            <Link
+              to="/chat"
+              className="clay-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground mb-2"
+            >
+              <ArrowLeft size={14} /> Back to Tax Chat
+            </Link>
+            <h1 className="text-2xl font-black text-foreground">ITR Filing Central</h1>
+            <p className="text-xs text-muted-foreground font-medium">
+              Statutory income computation and form identification for {assessmentYear}
+            </p>
           </div>
+
+          <ThemeToggle />
         </div>
 
         {/* ── ENTRY POINTS ─────────────────────────────────────── */}
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-            How would you like to proceed?
+          <h2 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-3">
+            Select Your Filing Workflow
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
             {/* Chat assistant */}
             <EntryCard
               to="/itr-chat"
-              badge="Recommended"
-              badgeColor="purple"
-              cta="Start guided filing"
-              ctaColor="purple"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>
-                </svg>
-              }
-              title="ITR Filing Assistant"
-              description="Chat with your CA assistant. It asks you questions, collects your documents, and builds your pre-fill PDF step by step. Best for first-time filers."
+              badge="Conversational"
+              variant="indigo"
+              cta="Start Guided Assistant"
+              icon={<Bot size={22} />}
+              title="Interactive ITR Assistant"
+              description="Guided interview with your CA agent. Answers questions, asks for clarification, ingests your documents, and builds a comprehensive downloadable computation draft."
             />
 
             {/* Quick analyse */}
             <EntryCard
               to="/itr"
-              badge="Fast"
-              badgeColor="teal"
-              cta="Quick analyse"
-              ctaColor="teal"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"/>
-                </svg>
-              }
-              title="Quick ITR Analyse"
-              description="Upload your bank statements and get an instant ITR checklist. No conversation needed — drop your documents and download the result in under 30 seconds."
+              badge="Instant Scan"
+              variant="emerald"
+              cta="Run Instant Scanner"
+              icon={<Zap size={22} />}
+              title="Fast Statement Scanner"
+              description="Drag and drop your bank statement PDF or images for 30-second automated anomaly inspection, regime comparisons, and required statutory document checklist."
             />
-
           </div>
         </div>
 
         {/* ── WHAT YOU NEED ─────────────────────────────────────── */}
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-foreground mb-4">
-            What to keep ready before you start
-          </h2>
+        <div className="clay-card p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileCheck className="text-emerald-500" size={18} />
+            <h2 className="text-sm font-bold text-foreground">Required Checklist Before Filing</h2>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { icon: "🪪", label: "PAN card",           note: "Your 10-digit PAN number" },
-              { icon: "📄", label: "Form 16",            note: "From your employer (for salaried)" },
-              { icon: "🏦", label: "Bank statements",    note: "Apr 2024 – Mar 2025" },
-              { icon: "💰", label: "Form 26AS / AIS",    note: "Download from incometax.gov.in" },
-              { icon: "🏠", label: "Home loan statement",note: "If you have a home loan (optional)" },
-              { icon: "📊", label: "Investment proofs",  note: "80C, 80D, NPS, ELSS etc. (optional)" },
+              { icon: "🪪", label: "PAN Card", note: "10-character permanent account number" },
+              { icon: "📄", label: "Form 16 (Part A & B)", note: "Employer TDS certificate for salaried individuals" },
+              { icon: "🏦", label: "Annual Bank Statements", note: "Savings & current accounts (Apr 2024 – Mar 2025)" },
+              { icon: "💰", label: "Form 26AS & AIS / TIS", note: "Tax credit & high-value reporting from e-filing portal" },
+              { icon: "🏠", label: "Home Loan & Rent Receipts", note: "Interest certificate (Sec 24b) and HRA claims" },
+              { icon: "📊", label: "Tax Saving Proofs", note: "80C, 80D, 80CCD (NPS), ELSS mutual fund statements" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
-                <span className="text-lg shrink-0">{item.icon}</span>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.note}</p>
+              <div key={i} className="clay-card p-3 flex items-center gap-3">
+                <span className="text-xl shrink-0">{item.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-foreground">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{item.note}</p>
                 </div>
               </div>
             ))}
@@ -188,104 +189,93 @@ export default function ITRHubPage() {
         </div>
 
         {/* ── ITR FORM GUIDE ────────────────────────────────────── */}
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Which ITR form do I need?</h2>
-          <div className="space-y-2">
+        <div className="clay-card p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <HelpCircle className="text-primary" size={18} />
+            <h2 className="text-sm font-bold text-foreground">Quick Form Selector Guide</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               {
-                form:  "ITR-1",
-                label: "Sahaj",
-                color: "bg-purple-500/15 text-purple-300",
-                who:   "Salaried individual",
-                rule:  "Income ≤ ₹50L, one house property max, no capital gains, no business income",
+                form: "ITR-1 (Sahaj)",
+                badgeBg: "bg-primary/20 text-primary border-primary/30",
+                who: "Salaried Individuals",
+                rule: "Total income ≤ ₹50 Lakh, 1 house property, other sources (interest). No capital gains.",
               },
               {
-                form:  "ITR-2",
-                label: "",
-                color: "bg-teal-500/15 text-teal-300",
-                who:   "Individual / HUF",
-                rule:  "Income > ₹50L, or has capital gains, or foreign income — but no business income",
+                form: "ITR-2",
+                badgeBg: "bg-emerald-500/20 text-emerald-500 border-emerald-500/30",
+                who: "Capital Gains & Multi-Property",
+                rule: "Income > ₹50 Lakh, stocks/mutual fund capital gains, foreign assets. No business income.",
               },
               {
-                form:  "ITR-3",
-                label: "",
-                color: "bg-amber-500/15 text-amber-300",
-                who:   "Business owner / professional",
-                rule:  "Has business or profession income, maintains full books of accounts",
+                form: "ITR-3",
+                badgeBg: "bg-amber-500/20 text-amber-500 border-amber-500/30",
+                who: "Proprietors & Professionals",
+                rule: "Has business or profession income with regular balance sheet & Profit/Loss accounting.",
               },
               {
-                form:  "ITR-4",
-                label: "Sugam",
-                color: "bg-muted text-muted-foreground",
-                who:   "Small business / freelancer",
-                rule:  "Opts for presumptive taxation under Sec 44AD, 44ADA, or 44AE",
+                form: "ITR-4 (Sugam)",
+                badgeBg: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+                who: "Presumptive Taxation",
+                rule: "Small businesses & professionals opting for Sec 44AD / 44ADA deemed profit declarations.",
               },
             ].map((row, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${row.color}`}>
+              <div key={i} className="clay-card p-3.5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className={`clay-pill px-2.5 py-0.5 text-xs font-bold ${row.badgeBg}`}>
                     {row.form}
                   </span>
-                  {row.label && (
-                    <span className="text-xs text-muted-foreground">{row.label}</span>
-                  )}
+                  <span className="text-[11px] text-muted-foreground font-semibold">{row.who}</span>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{row.who}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{row.rule}</p>
-                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">{row.rule}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-4">
-            Not sure? The filing assistant will determine this automatically from your documents.
-          </p>
         </div>
 
         {/* ── RECENT SESSIONS ──────────────────────────────────── */}
         {sessions.length > 0 && (
           <div>
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-              Recent sessions
+            <h2 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-3">
+              Saved Consultation Sessions
             </h2>
             <div className="space-y-2">
               {sessions.map((s, i) => (
                 <Link
                   key={i}
                   to={`/itr-chat?sessionId=${s.id}`}
-                  className="flex items-center justify-between bg-card border border-border
-                             rounded-xl px-4 py-3 hover:border-purple-500/40 hover:bg-purple-500/5
-                             transition-colors group"
+                  className="clay-card-interactive p-3.5 flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round"
-                          d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
-                      </svg>
+                    <div className="w-9 h-9 rounded-xl clay-btn-primary flex items-center justify-center shrink-0">
+                      <Bot size={16} className="text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {s.itrForm ?? "Session in progress"}
+                      <p className="text-xs font-bold text-foreground">
+                        {s.itrForm ?? "Filing Session In Progress"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {s.fields} fields · {new Date(s.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                      <p className="text-[10px] text-muted-foreground font-medium">
+                        {s.fields} items recorded · {new Date(s.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full
-                      ${s.stage === "ready"
-                        ? "bg-emerald-500/15 text-emerald-400"
-                        : "bg-muted text-muted-foreground"
-                      }`}>
-                      {s.stage === "ready" ? "Complete" : "In progress"}
-                    </span>
-                    <button 
-                      onClick={(e) => deleteSession(e, s.id)}
-                      className="p-1.5 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className={`clay-pill px-2.5 py-0.5 text-[10px] font-bold ${
+                        s.stage === "ready"
+                          ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                          : "bg-primary/15 text-primary border-primary/30"
+                      }`}
                     >
-                      <Trash2 size={16} />
+                      {s.stage === "ready" ? "Computation Ready" : "In Progress"}
+                    </span>
+                    <button
+                      onClick={(e) => deleteSession(e, s.id)}
+                      className="clay-btn p-1.5 rounded-lg text-muted-foreground hover:text-destructive"
+                      title="Delete session"
+                    >
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </Link>
@@ -295,17 +285,15 @@ export default function ITRHubPage() {
         )}
 
         {/* ── DISCLAIMER ───────────────────────────────────────── */}
-        <div className="bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3">
-          <p className="text-xs text-amber-300/90 leading-relaxed">
-            <strong>Disclaimer:</strong> CA Agent is a reference tool only. It does not file
-            your ITR on any government portal. All generated values are estimates — verify
-            with a qualified CA before submission. Tax laws may change; always cross-check
-            with the official income tax portal at incometax.gov.in.
-          </p>
+        <div className="clay-card p-4 bg-amber-500/10 border-amber-500/30 text-amber-500 dark:text-amber-400">
+          <div className="flex items-start gap-2.5">
+            <ShieldCheck size={18} className="shrink-0 mt-0.5" />
+            <p className="text-xs leading-relaxed font-medium">
+              <strong>Statutory Compliance Disclaimer:</strong> CA Agent provides automated estimations and document analysis based on Indian Income Tax Act guidelines. It is not an authorized e-filing intermediary. Please consult with a practicing Chartered Accountant before filing on incometax.gov.in.
+            </p>
+          </div>
         </div>
-
-        <div className="pb-4" />
       </div>
     </div>
-  )
+  );
 }

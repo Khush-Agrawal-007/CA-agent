@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useChat, type UploadedDocItem } from "../contexts/ChatContext";
 import {
   ResponsiveContainer,
@@ -12,7 +13,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ChevronDown, FileText, TrendingUp, TrendingDown, Banknote, Receipt } from "lucide-react";
+import { ChevronDown, FileText, TrendingUp, TrendingDown, Banknote, Receipt, ArrowLeft } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const COLORS = ["#10b981", "#f43f5e", "#f59e0b", "#6366f1"];
 
@@ -70,7 +72,7 @@ function StatementDropdown({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors text-sm font-medium text-foreground shadow-sm min-w-[220px] max-w-xs"
+        className="clay-btn flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-foreground min-w-[220px] max-w-xs transition-all"
       >
         <FileText size={14} className="text-primary shrink-0" />
         <span className="truncate flex-1 text-left">{label}</span>
@@ -81,19 +83,21 @@ function StatementDropdown({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-50 w-full min-w-[220px] bg-card border border-border rounded-xl shadow-2xl overflow-hidden max-h-64 overflow-y-auto">
+        <div className="absolute left-0 top-full mt-2 z-50 w-full min-w-[220px] clay-card p-1 max-h-64 overflow-y-auto">
           {docs.map((doc, i) => (
             <button
               key={i}
-              onClick={() => { onSelect(i); setOpen(false); }}
-              className={`w-full flex items-start gap-2 px-3 py-2.5 text-left transition-colors
-                ${i === selected
-                  ? "bg-primary/10"
-                  : "hover:bg-muted/60"}`}
+              onClick={() => {
+                onSelect(i);
+                setOpen(false);
+              }}
+              className={`w-full flex items-start gap-2 px-3 py-2 text-left rounded-xl transition-all ${
+                i === selected ? "bg-primary/15 text-primary font-bold" : "hover:bg-muted/60 text-foreground"
+              }`}
             >
               <FileText size={13} className={`mt-0.5 shrink-0 ${i === selected ? "text-primary" : "text-muted-foreground"}`} />
               <div className="min-w-0">
-                <p className={`text-sm truncate ${i === selected ? "text-primary font-semibold" : "text-foreground"}`}>
+                <p className="text-xs truncate font-semibold">
                   {doc.filename ?? `Statement ${i + 1}`}
                 </p>
                 <p className="text-[10px] text-muted-foreground truncate">{doc.chatTitle}</p>
@@ -119,13 +123,13 @@ function KpiCard({
   accentBg: string;
 }) {
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${accentBg}`}>
-        <Icon size={17} className="text-white" />
+    <div className="clay-card p-4 flex items-center gap-3.5">
+      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${accentBg}`}>
+        <Icon size={18} className="text-white drop-shadow-sm" />
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground font-medium truncate">{label}</p>
-        <p className="text-sm font-bold text-foreground tabular-nums mt-0.5">{value}</p>
+        <p className="text-[11px] text-muted-foreground font-semibold truncate">{label}</p>
+        <p className="text-base font-extrabold text-foreground tabular-nums mt-0.5">{value}</p>
       </div>
     </div>
   );
@@ -148,14 +152,27 @@ export default function Dashboard() {
 
   if (docs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <FileText size={22} className="text-primary" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 text-center px-6 relative transition-colors duration-200">
+        <div className="absolute top-6 left-6 flex items-center gap-3">
+          <Link to="/chat" className="clay-btn p-2 rounded-xl flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
+            <ArrowLeft size={16} />
+            <span>Back to Chat</span>
+          </Link>
         </div>
-        <p className="text-sm font-medium text-foreground">No statements uploaded yet</p>
-        <p className="text-xs text-muted-foreground max-w-xs">
-          Upload a bank statement in the chat to see its financial visualisation here.
+        <div className="absolute top-6 right-6">
+          <ThemeToggle />
+        </div>
+
+        <div className="w-16 h-16 rounded-2xl clay-btn-primary flex items-center justify-center">
+          <FileText size={28} className="text-white drop-shadow-sm" />
+        </div>
+        <h3 className="text-lg font-bold text-foreground">No financial statements uploaded yet</h3>
+        <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+          Upload a bank statement PDF or image in the tax consultation chat to see interactive visualizations and tax breakdowns.
         </p>
+        <Link to="/chat" className="clay-btn-primary px-6 py-2.5 text-xs font-bold tracking-wide">
+          Go to Tax Chat
+        </Link>
       </div>
     );
   }
@@ -166,107 +183,132 @@ export default function Dashboard() {
 
   const barData = [
     { name: "Credits", value: totalCredits, fill: "#10b981" },
-    { name: "Debits",  value: totalDebits,  fill: "#f43f5e" },
+    { name: "Debits", value: totalDebits, fill: "#f43f5e" },
     { name: "Est. Tax", value: estimatedTax, fill: "#f59e0b" },
   ];
 
   const pieData = [
-    { name: "Net Income",   value: Math.max(0, netCashFlow) },
+    { name: "Net Income", value: Math.max(0, netCashFlow) },
     { name: "Total Debits", value: totalDebits },
     ...(estimatedTax > 0 ? [{ name: "Est. Tax", value: estimatedTax }] : []),
   ].filter((d) => d.value > 0);
 
   return (
-    <div className="p-5 space-y-5 overflow-y-auto h-full">
+    <div className="min-h-screen bg-background p-6 space-y-6 overflow-y-auto max-w-6xl mx-auto transition-colors duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Financial Overview</h2>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {docs.length} statement{docs.length !== 1 ? "s" : ""} — select one to inspect
-          </p>
+      <div className="flex items-center justify-between gap-4 flex-wrap pb-2 border-b border-border">
+        <div className="flex items-center gap-3">
+          <Link to="/chat" className="clay-btn p-2 rounded-xl text-muted-foreground hover:text-foreground">
+            <ArrowLeft size={18} />
+          </Link>
+          <div>
+            <h1 className="text-xl font-extrabold text-foreground">Financial & Tax Analytics</h1>
+            <p className="text-xs text-muted-foreground font-medium mt-0.5">
+              {docs.length} statement{docs.length !== 1 ? "s" : ""} indexed across your tax consultations
+            </p>
+          </div>
         </div>
-        <StatementDropdown docs={docs} selected={safeIdx} onSelect={setSelectedIdx} />
+
+        <div className="flex items-center gap-3">
+          <StatementDropdown docs={docs} selected={safeIdx} onSelect={setSelectedIdx} />
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <KpiCard label="Total Credits"     value={fmt(totalCredits)}  icon={TrendingUp}   accentBg="bg-emerald-500" />
-        <KpiCard label="Total Debits"      value={fmt(totalDebits)}   icon={TrendingDown} accentBg="bg-rose-500" />
-        <KpiCard label="Net Cash Flow"     value={fmt(netCashFlow)}   icon={Banknote}     accentBg={netCashFlow >= 0 ? "bg-primary" : "bg-orange-500"} />
-        <KpiCard label="Est. Tax (FY 25-26)" value={fmt(estimatedTax)} icon={Receipt}     accentBg="bg-amber-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard label="Total Credits (Deposits)" value={fmt(totalCredits)} icon={TrendingUp} accentBg="bg-emerald-500" />
+        <KpiCard label="Total Debits (Expenses)" value={fmt(totalDebits)} icon={TrendingDown} accentBg="bg-rose-500" />
+        <KpiCard label="Net Annual Inflow" value={fmt(netCashFlow)} icon={Banknote} accentBg={netCashFlow >= 0 ? "clay-btn-primary" : "bg-amber-500"} />
+        <KpiCard label="Est. Tax Liability (FY 25)" value={fmt(estimatedTax)} icon={Receipt} accentBg="bg-amber-500" />
       </div>
 
-      {/* Bar chart */}
-      <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-          Credits · Debits · Tax
-        </p>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={barData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis
-              tick={{ fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              width={64}
-              tickFormatter={(v) => "₹" + Number(v).toLocaleString("en-IN")}
-            />
-            <Tooltip
-              contentStyle={{ borderRadius: 12, fontSize: 12, border: "1px solid var(--border)" }}
-              formatter={(v: unknown) => fmt(Number(v))}
-            />
-            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-              {barData.map((entry, i) => (
-                <Cell key={i} fill={entry.fill} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Pie chart */}
-      <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-          Income Distribution
-        </p>
-        {pieData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={3}
-                dataKey="value"
-                label={({ name, percent }) =>
-                  percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
-                }
-                labelLine={false}
-              >
-                {pieData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Bar chart */}
+        <div className="clay-card p-5">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
+            Financial Balance Comparison
+          </p>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={barData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: "currentColor" }} axisLine={false} tickLine={false} />
+              <YAxis
+                tick={{ fontSize: 11, fill: "currentColor" }}
+                axisLine={false}
+                tickLine={false}
+                width={70}
+                tickFormatter={(v) => "₹" + Number(v).toLocaleString("en-IN")}
+              />
               <Tooltip
-                contentStyle={{ borderRadius: 12, fontSize: 12, border: "1px solid var(--border)" }}
+                contentStyle={{
+                  borderRadius: 14,
+                  fontSize: 12,
+                  backgroundColor: "var(--card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+                }}
                 formatter={(v: unknown) => fmt(Number(v))}
               />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
+              <Bar dataKey="value" radius={[10, 10, 0, 0]}>
+                {barData.map((entry, i) => (
+                  <Cell key={i} fill={entry.fill} />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
-        ) : (
-          <div className="h-24 flex items-center justify-center text-xs text-muted-foreground">
-            No data to display
-          </div>
-        )}
+        </div>
+
+        {/* Pie chart */}
+        <div className="clay-card p-5">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
+            Income vs Outflow Allocation
+          </p>
+          {pieData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={95}
+                  paddingAngle={4}
+                  dataKey="value"
+                  label={({ name, percent }) =>
+                    percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
+                  }
+                  labelLine={false}
+                >
+                  {pieData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 14,
+                    fontSize: 12,
+                    backgroundColor: "var(--card)",
+                    borderColor: "var(--border)",
+                    boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+                  }}
+                  formatter={(v: unknown) => fmt(Number(v))}
+                />
+                <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-56 flex items-center justify-center text-xs text-muted-foreground font-medium">
+              No breakdown available for this statement
+            </div>
+          )}
+        </div>
       </div>
 
-      <p className="text-[11px] text-muted-foreground text-right pr-1">
-        Showing: <span className="font-medium text-foreground">{doc.filename}</span>
-      </p>
+      <div className="clay-card p-3.5 flex items-center justify-between text-xs font-semibold">
+        <span className="text-muted-foreground">Inspected File:</span>
+        <span className="text-primary font-bold">{doc.filename}</span>
+      </div>
     </div>
   );
 }

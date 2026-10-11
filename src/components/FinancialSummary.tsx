@@ -13,12 +13,12 @@ const formatCurrency = (n: number) =>
 const FinancialSummary = ({ data, isLoading }: FinancialSummaryProps) => {
   if (isLoading) {
     return (
-      <div className="my-3 p-4 bg-muted/40 border border-border rounded-xl">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="space-y-2">
-              <div className="h-3 w-20 bg-muted rounded animate-pulse" />
-              <div className="h-6 w-28 bg-muted rounded animate-pulse" />
+      <div className="my-3 clay-card p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="clay-card p-3 space-y-2">
+              <div className="h-3 w-16 bg-muted rounded-full animate-pulse" />
+              <div className="h-6 w-24 bg-muted rounded-xl animate-pulse" />
             </div>
           ))}
         </div>
@@ -27,9 +27,27 @@ const FinancialSummary = ({ data, isLoading }: FinancialSummaryProps) => {
   }
 
   const items = [
-    { label: 'Total Credit', value: data.totalCredit, icon: TrendingUp, color: 'text-success', bgColor: 'bg-success/10', borderColor: 'border-success/20' },
-    { label: 'Total Debit', value: data.totalDebit, icon: TrendingDown, color: 'text-destructive', bgColor: 'bg-destructive/10', borderColor: 'border-destructive/20' },
-    { label: 'Estimated Tax', value: data.estimatedTax, icon: Receipt, color: 'text-primary', bgColor: 'bg-primary/10', borderColor: 'border-primary/20' },
+    {
+      label: 'Total Credit',
+      value: data.totalCredit,
+      icon: TrendingUp,
+      color: 'text-emerald-500',
+      badgeBg: 'bg-emerald-500/15',
+    },
+    {
+      label: 'Total Debit',
+      value: data.totalDebit,
+      icon: TrendingDown,
+      color: 'text-rose-500',
+      badgeBg: 'bg-rose-500/15',
+    },
+    {
+      label: 'Estimated Tax',
+      value: data.estimatedTax,
+      icon: Receipt,
+      color: 'text-primary',
+      badgeBg: 'bg-primary/15',
+    },
   ];
 
   return (
@@ -38,15 +56,19 @@ const FinancialSummary = ({ data, isLoading }: FinancialSummaryProps) => {
       animate={{ opacity: 1, y: 0 }}
       className="my-3"
     >
-      <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Financial Summary</p>
+      <p className="text-[11px] font-extrabold text-muted-foreground mb-2 uppercase tracking-wider">
+        Financial Snapshot
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {items.map(({ label, value, icon: Icon, color, bgColor, borderColor }) => (
-          <div key={label} className={`${bgColor} border ${borderColor} rounded-xl p-4`}>
-            <div className="flex items-center gap-2 mb-1">
-              <Icon size={16} className={color} />
-              <span className="text-xs text-muted-foreground">{label}</span>
+        {items.map(({ label, value, icon: Icon, color, badgeBg }) => (
+          <div key={label} className="clay-card p-3.5">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className={`w-6 h-6 rounded-lg ${badgeBg} flex items-center justify-center`}>
+                <Icon size={14} className={color} />
+              </div>
+              <span className="text-xs text-muted-foreground font-semibold">{label}</span>
             </div>
-            <p className={`text-lg font-bold ${color}`}>{formatCurrency(value)}</p>
+            <p className={`text-base font-extrabold tabular-nums ${color}`}>{formatCurrency(value)}</p>
           </div>
         ))}
       </div>

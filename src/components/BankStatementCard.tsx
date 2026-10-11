@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Building2, Calendar, TrendingUp, TrendingDown, Wallet, ArrowUpDown, Receipt, IndianRupee } from 'lucide-react';
+import { Building2, Calendar, TrendingUp, TrendingDown, Wallet, ArrowUpDown, Receipt, IndianRupee, FileSpreadsheet } from 'lucide-react';
 
 export interface BankSummaryData {
   personEntity: string;
@@ -22,133 +22,109 @@ const StatRow = ({
   label,
   value,
   colorClass,
-  bgClass,
   delay,
 }: {
   icon: React.ElementType;
   label: string;
   value: string;
   colorClass: string;
-  bgClass: string;
   delay: number;
 }) => (
   <motion.div
-    initial={{ opacity: 0, x: -12 }}
+    initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.35, delay }}
-    className={`flex items-center justify-between rounded-xl px-4 py-3 ${bgClass} border border-white/5`}
+    transition={{ duration: 0.3, delay }}
+    className="clay-card p-3.5 flex items-center justify-between"
   >
     <div className="flex items-center gap-3">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorClass} bg-current/10`}>
-        <Icon size={15} className="text-current opacity-80" style={{ color: 'inherit' }} />
+      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${colorClass} bg-current/15 shrink-0`}>
+        <Icon size={16} className="text-current" />
       </div>
-      <span className="text-sm text-muted-foreground font-medium">{label}</span>
+      <span className="text-xs text-muted-foreground font-semibold">{label}</span>
     </div>
-    <span className={`text-sm font-bold tabular-nums ${colorClass}`}>{value}</span>
+    <span className={`text-sm font-extrabold tabular-nums ${colorClass}`}>{value}</span>
   </motion.div>
 );
 
 const BankStatementCard = ({ data, filename }: BankStatementCardProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="mt-3 rounded-2xl border border-border bg-card overflow-hidden shadow-lg"
+      className="clay-card mt-3 overflow-hidden"
     >
       {/* Header */}
-      <div className="px-5 py-4 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-border flex items-start justify-between gap-3">
+      <div className="p-4 border-b border-border bg-gradient-to-r from-primary/15 via-primary/5 to-transparent flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shrink-0 shadow-md">
-            <Building2 size={18} className="text-primary-foreground" />
+          <div className="w-10 h-10 rounded-2xl clay-btn-primary flex items-center justify-center shrink-0">
+            <Building2 size={20} className="text-white" />
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-primary mb-0.5">
-              Bank Statement Summary
-            </p>
-            <p className="text-sm font-bold text-foreground leading-tight">
-              {data.personEntity !== 'N/A' ? data.personEntity : filename ?? 'Statement'}
-            </p>
+            <h3 className="text-sm font-black text-foreground">
+              {data.personEntity || 'Extracted Bank Statement'}
+            </h3>
+            {filename && (
+              <p className="text-[11px] text-muted-foreground font-medium truncate max-w-xs">{filename}</p>
+            )}
           </div>
         </div>
 
-        {data.period !== 'N/A' && (
-          <div className="flex items-center gap-1.5 bg-muted/60 rounded-lg px-2.5 py-1.5 shrink-0">
-            <Calendar size={12} className="text-muted-foreground" />
-            <span className="text-[11px] text-muted-foreground font-medium">{data.period}</span>
+        {data.period && (
+          <div className="clay-pill px-3 py-1 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground shrink-0">
+            <Calendar size={12} className="text-primary" />
+            <span>{data.period}</span>
           </div>
         )}
       </div>
 
-      {/* Stats grid */}
-      <div className="p-4 space-y-2.5">
+      {/* Grid of stats */}
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <StatRow
-          icon={Wallet}
-          label="Opening Balance"
-          value={data.openingBalance}
-          colorClass="text-foreground"
-          bgClass="bg-muted/30"
+          icon={TrendingUp}
+          label="Total Credits (Deposits)"
+          value={data.totalCredits || '₹0'}
+          colorClass="text-emerald-500"
           delay={0.05}
         />
         <StatRow
-          icon={TrendingUp}
-          label="Total Credits"
-          value={data.totalCredits}
-          colorClass="text-emerald-400"
-          bgClass="bg-emerald-500/8"
+          icon={TrendingDown}
+          label="Total Debits (Withdrawals)"
+          value={data.totalDebits || '₹0'}
+          colorClass="text-rose-500"
           delay={0.1}
         />
         <StatRow
-          icon={TrendingDown}
-          label="Total Debits"
-          value={data.totalDebits}
-          colorClass="text-rose-400"
-          bgClass="bg-rose-500/8"
+          icon={Wallet}
+          label="Opening Balance"
+          value={data.openingBalance || '₹0'}
+          colorClass="text-foreground"
           delay={0.15}
         />
-
-        {/* Divider */}
-        <div className="border-t border-border/60 my-1" />
-
         <StatRow
           icon={ArrowUpDown}
           label="Closing Balance"
-          value={data.closingBalance}
-          colorClass="text-primary"
-          bgClass="bg-primary/8"
+          value={data.closingBalance || '₹0'}
+          colorClass="text-foreground"
           delay={0.2}
         />
       </div>
 
-      {/* Tax Estimate Section */}
-      {(data.estimatedAnnualIncome !== 'N/A' || data.estimatedTax !== 'N/A') &&
-       (data.estimatedAnnualIncome !== '₹0' || data.estimatedTax !== '₹0') && (
-        <div className="border-t border-border">
-          <div className="px-4 py-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-400/80">
-              Tax Estimate · New Regime FY 2025-26
-            </p>
-          </div>
-          <div className="px-4 pb-4 pt-1 space-y-2.5">
-            <StatRow
-              icon={IndianRupee}
-              label="Estimated Annual Income"
-              value={data.estimatedAnnualIncome}
-              colorClass="text-amber-400"
-              bgClass="bg-amber-500/8"
-              delay={0.25}
-            />
-            <StatRow
-              icon={Receipt}
-              label="Estimated Tax (incl. Cess)"
-              value={data.estimatedTax}
-              colorClass="text-amber-300"
-              bgClass="bg-amber-500/8"
-              delay={0.3}
-            />
-          </div>
+      {/* Estimated Tax Summary Banner */}
+      <div className="mx-4 mb-4 p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 border border-primary/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary block mb-0.5">
+            FY 2024-25 Assessment projection
+          </span>
+          <p className="text-xs font-medium text-muted-foreground">
+            Projected Net Annual Income: <strong className="text-foreground">{data.estimatedAnnualIncome || 'N/A'}</strong>
+          </p>
         </div>
-      )}
+        <div className="clay-btn-primary px-4 py-2 rounded-xl text-center self-start sm:self-auto">
+          <span className="text-[10px] block opacity-85 font-medium">Estimated New Regime Tax</span>
+          <span className="text-sm font-extrabold">{data.estimatedTax || '₹0'}</span>
+        </div>
+      </div>
     </motion.div>
   );
 };

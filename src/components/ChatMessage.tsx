@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { Copy, AlertCircle, FileText, Image, ChevronDown } from 'lucide-react';
+import { Copy, AlertCircle, FileText, Image, ChevronDown, Check, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useState } from 'react';
 import { ChatMessage as ChatMessageType } from '@/contexts/ChatContext';
 import FinancialSummary from './FinancialSummary';
 import BankStatementCard from './BankStatementCard';
@@ -9,143 +10,139 @@ import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const TypingIndicator = () => (
-  <div className="flex items-center gap-1.5 py-2 px-1">
-    <div className="w-2 h-2 rounded-full gradient-primary animate-typing" />
-    <div className="w-2 h-2 rounded-full gradient-primary animate-typing" style={{ animationDelay: '0.2s' }} />
-    <div className="w-2 h-2 rounded-full gradient-primary animate-typing" style={{ animationDelay: '0.4s' }} />
+  <div className="flex items-center gap-1.5 py-2 px-2">
+    <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+    <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0.2s' }} />
+    <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0.4s' }} />
   </div>
 );
 
 const ChatMessage = ({ message }: { message: ChatMessageType }) => {
   const isUser = message.role === 'user';
+  const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(message.content);
+    setCopied(true);
     toast.success('Copied to clipboard');
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: isUser ? 20 : -20, y: 5 }}
+      initial={{ opacity: 0, x: isUser ? 20 : -20, y: 6 }}
       animate={{ opacity: 1, x: 0, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-5`}
     >
       <div
         className={`${
-          isUser ? 'max-w-[80%] lg:max-w-[70%]' : 'max-w-[95%] lg:max-w-[88%]'
-        } ${isUser ? 'order-1' : 'order-1'}`}
+          isUser ? 'max-w-[85%] lg:max-w-[75%]' : 'max-w-[95%] lg:max-w-[90%]'
+        }`}
       >
-        {/* User avatar / AI avatar */}
         <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-            isUser ? 'bg-primary/20 text-primary' : 'gradient-primary text-primary-foreground'
-          }`}>
-            {isUser ? (
-              <span className="text-xs font-bold">U</span>
-            ) : (
-              <span className="text-xs font-bold">AI</span>
-            )}
+          {/* Avatar with Clay styling */}
+          <div
+            className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+              isUser
+                ? 'clay-btn-emerald text-white text-xs font-bold'
+                : 'clay-btn-primary text-white text-xs font-bold'
+            }`}
+          >
+            {isUser ? 'YOU' : <Sparkles size={16} />}
           </div>
 
           <div className="flex-1 min-w-0">
-            {/* File attachment */}
+            {/* File attachment preview */}
             {message.fileName && (
-              <div className={`flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-muted/50 border border-border text-sm ${isUser ? 'ml-auto w-fit' : ''}`}>
-                {message.fileType?.startsWith('image/') ? <Image size={14} className="text-primary" /> : <FileText size={14} className="text-primary" />}
-                <span className="text-muted-foreground truncate">{message.fileName}</span>
+              <div
+                className={`flex items-center gap-2 mb-2 px-3 py-2 clay-card text-xs font-semibold ${
+                  isUser ? 'ml-auto w-fit' : ''
+                }`}
+              >
+                {message.fileType?.startsWith('image/') ? (
+                  <Image size={15} className="text-primary" />
+                ) : (
+                  <FileText size={15} className="text-primary" />
+                )}
+                <span className="text-foreground truncate max-w-xs">{message.fileName}</span>
               </div>
             )}
 
-            {/* Message bubble — hidden for bank summary cards (card replaces it) */}
-            {(!message.bankSummary || message.isLoading || message.isError) && (
-              <div className={`rounded-xl px-4 py-3 ${
-                isUser
-                  ? 'gradient-primary text-primary-foreground'
-                  : message.isError
-                    ? 'bg-destructive/10 border border-destructive/20'
-                    : 'bg-card border border-border'
-              }`}>
+            {/* Message bubble */}
+            {!message.bankSummary && (
+              <div
+                className={`relative group rounded-2xl p-4 transition-all ${
+                  isUser
+                    ? 'clay-card bg-primary/10 border-primary/30 text-foreground font-medium'
+                    : 'clay-card bg-card text-foreground'
+                }`}
+              >
                 {message.isLoading ? (
-                  <TypingIndicator />
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                    <TypingIndicator />
+                    <span>Analyzing statutory clauses & calculating...</span>
+                  </div>
                 ) : message.isError ? (
-                  <div className="flex items-center gap-2 text-destructive">
+                  <div className="flex items-center gap-2 text-destructive text-sm font-semibold">
                     <AlertCircle size={16} />
-                    <span className="text-sm">{message.content}</span>
+                    <span>{message.content}</span>
                   </div>
-                ) : isUser ? (
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 ) : (
-                  <div className="prose prose-sm prose-invert max-w-none text-foreground">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        h1: ({ children }) => <h1 className="text-lg font-bold text-foreground mt-3 mb-2">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-base font-bold text-foreground mt-3 mb-1.5">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-sm font-bold text-foreground mt-2 mb-1">{children}</h3>,
-                        p: ({ children }) => <p className="text-sm text-foreground/90 mb-2 leading-relaxed">{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
-                        li: ({ children }) => <li className="text-sm text-foreground/90">{children}</li>,
-                        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                        blockquote: ({ children }) => <blockquote className="border-l-2 border-primary pl-3 italic text-muted-foreground my-2">{children}</blockquote>,
-                        table: ({ children }) => <div className="overflow-x-auto my-2"><table className="text-sm border-collapse w-full">{children}</table></div>,
-                        th: ({ children }) => <th className="border border-border px-3 py-1.5 text-left font-semibold bg-muted/50">{children}</th>,
-                        td: ({ children }) => <td className="border border-border px-3 py-1.5">{children}</td>,
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  </div>
+                  <>
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+                      <ReactMarkdown remarkGfm={remarkGfm}>{message.content}</ReactMarkdown>
+                    </div>
+
+                    {!isUser && (
+                      <button
+                        onClick={copyToClipboard}
+                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 clay-btn rounded-lg text-muted-foreground hover:text-foreground"
+                        title="Copy text"
+                      >
+                        {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             )}
 
-            {/* Bank statement upload card */}
-            {!isUser && message.bankSummary && (
+            {/* Embedded Bank Statement Card */}
+            {message.bankSummary && (
               <BankStatementCard data={message.bankSummary} filename={message.fileName} />
             )}
 
-            {/* Financial summary (structured document upload) */}
-            {!isUser && message.financialData && !message.bankSummary && (
+            {/* Embedded Financial Summary */}
+            {message.financialData && (
               <FinancialSummary data={message.financialData} />
             )}
 
-
-
-            {!isUser && message.retrievedChunks && message.retrievedChunks.length > 0 && !message.isLoading && !message.isError && (
-              <Collapsible className="mt-2 border border-border rounded-lg bg-muted/20 overflow-hidden">
-                <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted/40 [&[data-state=open]_svg]:rotate-180">
-                  <span>Retrieved ICAI chunks</span>
-                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform" />
+            {/* Retrieved chunks / Knowledge references collapsible */}
+            {message.retrievedChunks && message.retrievedChunks.length > 0 && (
+              <Collapsible className="mt-2.5">
+                <CollapsibleTrigger className="clay-btn px-3 py-1.5 rounded-xl text-[11px] font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors">
+                  <FileText size={13} className="text-primary" />
+                  <span>Referenced Tax Statutes ({message.retrievedChunks.length} sections)</span>
+                  <ChevronDown size={12} className="transition-transform group-data-[state=open]:rotate-180" />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="px-3 pb-3 space-y-2 text-xs border-t border-border/60 bg-card/30 max-h-64 overflow-y-auto">
-                  {message.retrievedChunks.map((ch, i) => (
-                    <pre
-                      key={`${ch.chunk_id}-${i}`}
-                      className="whitespace-pre-wrap break-words rounded-md bg-background/60 p-2 border border-border/40 font-mono text-[11px] text-foreground/90"
-                    >
-                      {JSON.stringify(
-                        { level: ch.level, book: ch.book, chunk_id: ch.chunk_id, text: ch.text },
-                        null,
-                        2
-                      )}
-                    </pre>
+                <CollapsibleContent className="mt-2 space-y-2">
+                  {message.retrievedChunks.map((chunk, i) => (
+                    <div key={i} className="clay-card p-3 text-xs">
+                      <div className="flex items-center justify-between text-muted-foreground font-semibold mb-1 text-[11px]">
+                        <span className="text-primary font-bold">{chunk.level || 'IT Act'} - {chunk.book || 'Direct Tax'}</span>
+                        <span className="clay-pill px-2 py-0.5 text-[10px]">Chunk #{chunk.chunk_id}</span>
+                      </div>
+                      <p className="text-foreground/80 leading-relaxed font-mono text-[11px] whitespace-pre-wrap">{chunk.text}</p>
+                    </div>
                   ))}
                 </CollapsibleContent>
               </Collapsible>
             )}
 
-            {/* Copy button for AI messages (hidden for bank summary cards) */}
-            {!isUser && !message.isLoading && !message.isError && !message.bankSummary && (
-              <button
-                onClick={copyToClipboard}
-                className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Copy size={12} />
-                Copy
-              </button>
-            )}
+            <div className={`mt-1 px-1 text-[10px] text-muted-foreground font-medium ${isUser ? 'text-right' : 'text-left'}`}>
+              {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 import { toast } from 'sonner';
 
 const Signup = () => {
@@ -25,9 +26,9 @@ const Signup = () => {
     if (/[^A-Za-z0-9]/.test(password)) score++;
     const levels = [
       { level: 1, label: 'Weak', color: 'bg-destructive' },
-      { level: 2, label: 'Fair', color: 'bg-orange-500' },
-      { level: 3, label: 'Good', color: 'bg-yellow-500' },
-      { level: 4, label: 'Strong', color: 'bg-success' },
+      { level: 2, label: 'Fair', color: 'bg-amber-500' },
+      { level: 3, label: 'Good', color: 'bg-emerald-500' },
+      { level: 4, label: 'Strong', color: 'bg-emerald-600' },
     ];
     return levels[score - 1] || { level: 0, label: '', color: '' };
   };
@@ -51,130 +52,132 @@ const Signup = () => {
   const strength = getPasswordStrength();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden transition-colors duration-200">
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 rounded-full bg-secondary/5 blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 rounded-full bg-secondary/10 blur-3xl" />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Logo size="lg" />
           </div>
-          <p className="text-muted-foreground">Create your account</p>
+          <p className="text-muted-foreground font-medium">Create your AI Tax Assistant account</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 shadow-2xl">
+        <div className="clay-card p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-3 text-sm"
+                className="bg-destructive/15 border border-destructive/30 text-destructive rounded-xl p-3.5 text-sm font-medium"
               >
                 {error}
               </motion.div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
+              <label className="block text-sm font-semibold text-foreground/90 mb-1.5">Full Name</label>
               <input
                 type="text"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                className="w-full clay-input px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+              <label className="block text-sm font-semibold text-foreground/90 mb-1.5">Email Address</label>
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full clay-input px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Password</label>
+              <label className="block text-sm font-semibold text-foreground/90 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all pr-10"
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min 8 characters"
+                  className="w-full clay-input px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               {password && (
                 <div className="mt-2">
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4].map(i => (
+                  <div className="flex gap-1 h-1.5 rounded-full overflow-hidden bg-muted/60">
+                    {[1, 2, 3, 4].map((i) => (
                       <div
                         key={i}
-                        className={`h-1 flex-1 rounded-full transition-all ${i <= strength.level ? strength.color : 'bg-border'}`}
+                        className={`flex-1 transition-colors rounded-full ${
+                          i <= strength.level ? strength.color : 'bg-transparent'
+                        }`}
                       />
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{strength.label}</p>
+                  <span className="text-xs text-muted-foreground mt-1 block font-medium">
+                    Strength: {strength.label}
+                  </span>
                 </div>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-semibold text-foreground/90 mb-1.5">Confirm Password</label>
               <input
                 type="password"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-input border border-border rounded-lg px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                className="w-full clay-input px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full gradient-primary text-primary-foreground font-semibold py-2.5 rounded-lg glow-hover transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+              className="w-full clay-btn-primary py-3.5 flex items-center justify-center gap-2 font-bold text-sm tracking-wide mt-2 disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground animate-typing" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground animate-typing" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground animate-typing" style={{ animationDelay: '0.4s' }} />
-                </div>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <UserPlus size={18} />
-                  Create Account
+                  <span>Create Account</span>
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Link to="/login" className="text-primary hover:text-primary/80 font-medium transition-colors">
-                Login
-              </Link>
-            </p>
+          <div className="mt-6 text-center text-sm text-muted-foreground font-medium">
+            Already have an account?{' '}
+            <Link to="/login" className="text-primary font-bold hover:underline">
+              Sign in
+            </Link>
           </div>
         </div>
       </motion.div>
