@@ -22,4 +22,4 @@ ollama pull bge-m3
 echo "bge-m3 ready. Starting FastAPI server..."
 
 # Start FastAPI on the Railway-provided PORT
-exec uvicorn api:app --host 0.0.0.0 --port ""
+exec uvicorn api:app --host 0.0.0.0 --port "${PORT:-8000}"
